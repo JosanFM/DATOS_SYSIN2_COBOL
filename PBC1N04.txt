@@ -1,0 +1,121 @@
+      *----------------------------------------------------------------*
+       IDENTIFICATION DIVISION.
+      *----------------------------------------------------------------*
+       PROGRAM-ID. PBC1N04.                                             00003012
+       AUTHOR. JOSE ANTONIO FERNANDEZ                                   00004001
+      *                                                                 00005000
+      * Este programa toma datos por SYSIN y saca un listado            00010006
+      * Ademas muestra si existe en ese listado otro valor que tambien
+      * le pasamos por la SYSIN.                                        00012012
+      *----------------------------------------------------------------*00020000
+       ENVIRONMENT DIVISION.                                            00030000
+      *----------------------------------------------------------------*00040000
+       CONFIGURATION SECTION.                                           00040100
+       INPUT-OUTPUT SECTION.                                            00040200
+       FILE-CONTROL.                                                    00040300
+                                                                        00041000
+      *----------------------------------------------------------------*00050000
+       DATA DIVISION.                                                   00051000
+      *----------------------------------------------------------------*00060000
+       FILE SECTION.                                                    00060100
+       WORKING-STORAGE SECTION.                                         00060200
+       01 WS-CONTANTES.                                                 00060300
+          05 CTE-NOMPGM             PIC X(7)  VALUE 'PBC1N04'.          00060412
+          05 DSP-WILDCARDS          PIC X(40) VALUE ALL '*'.            00060513
+          05 DSP-GUIONES            PIC X(40) VALUE ALL '-'.            00060613
+          05 DSP-EQUALS             PIC X(40) VALUE ALL '='.            00060714
+          05 CTN-5                  PIC 9     VALUE 5.                  00060813
+       01 WS-VARIABLES.                                                 00060913
+          05 TBL-DIAS-SEMANA OCCURS 7 PIC X(10) VALUE SPACES.           00061013
+          05 AUX-SEARCH             PIC X(10).                          00061113
+          05 AUX-I                  PIC 9.                              00061213
+          05 AUX-J                  PIC 9.                              00061313
+          05 AUX-DATE.                                                  00061413
+             10 AUX-YYYY            PIC 9(4).                           00061513
+             10 AUX-MM              PIC 9(2).                           00061613
+             10 AUX-DD              PIC 9(2).                           00061713
+       01 SWITCHES.                                                     00061813
+          05 SW-FOUND               PIC 9  VALUE 0.                     00061913
+             88 NOT-FOUND                  VALUE 0.                     00062013
+             88 YES-FOUND                  VALUE 1.                     00063013
+                                                                        00066012
+      *----------------------------------------------------------------*00070000
+       PROCEDURE DIVISION.                                              00071000
+      *----------------------------------------------------------------*00080000
+           PERFORM 1000-INICIO                                          00081000
+           PERFORM 2000-PROCESS                                         00082000
+           PERFORM 3000-END                                             00083000
+           .                                                            00084000
+                                                                        00085000
+      *------------*                                                    00085100
+       1000-INICIO.                                                     00086000
+      *------------*                                                    00086100
+           INITIALIZE  WS-VARIABLES                                     00086201
+           MOVE 1                      TO AUX-I                         00086307
+      *    SET NOT-FOUND               TO TRUE                          00086412
+                                                                        00086604
+      **   PERFORM INSERTAR-ESPACIOS 5 TIMES                            00086713
+           .                                                            00089001
+                                                                        00090000
+      *------------*                                                    00091000
+       2000-PROCESS.                                                    00100000
+      *------------*                                                    00101000
+           PERFORM 2100-LEER-LISTADO-SYSIN 7 TIMES                      00101107
+           PERFORM 2300-BUSCAR-VALOR                                    00101212
+           PERFORM 2500-DISPLAY-RESULTS                                 00101307
+           .                                                            00101407
+                                                                        00101507
+       2100-LEER-LISTADO-SYSIN.                                         00101612
+           ACCEPT AUX-DATE FROM DATE YYYYMMDD                           00101712
+           ACCEPT TBL-DIAS-SEMANA(AUX-I)                                00101812
+           ADD 1 TO AUX-I                                               00101912
+           .                                                            00102012
+                                                                        00102112
+       2300-BUSCAR-VALOR.                                               00102212
+           ACCEPT AUX-SEARCH                                            00102312
+           PERFORM VARYING AUX-I FROM 1 BY 1 UNTIL AUX-I > 7            00102512
+              IF AUX-SEARCH = TBL-DIAS-SEMANA(AUX-I)                    00102612
+                 MOVE AUX-I TO AUX-J                                    00102912
+                 SET YES-FOUND TO TRUE                                  00103013
+              END-IF                                                    00103112
+           END-PERFORM                                                  00103212
+           .                                                            00103714
+                                                                        00103812
+       2500-DISPLAY-RESULTS.                                            00103907
+           DISPLAY  DSP-WILDCARDS                                       00104013
+           DISPLAY '  COMIENZA EL PROGRAMA ' CTE-NOMPGM                 00104106
+           DISPLAY DSP-GUIONES                                          00104213
+                                                                        00104307
+           DISPLAY '       *  ' AUX-DD OF AUX-DATE                      00104407
+                   '/' AUX-MM OF AUX-DATE                               00104507
+                   '/' AUX-YYYY OF AUX-DATE '  *        '               00104607
+                                                                        00104707
+           MOVE 1 TO AUX-I                                              00104807
+           PERFORM UNTIL AUX-I > 7                                      00104907
+              DISPLAY '   ' AUX-I ':' TBL-DIAS-SEMANA(AUX-I)            00105010
+              ADD 1 TO AUX-I                                            00105107
+           END-PERFORM                                                  00105207
+                                                                        00105313
+           DISPLAY DSP-EQUALS                                           00105413
+           IF YES-FOUND                                                 00105514
+              DISPLAY 'Dia ' AUX-SEARCH ' encontrado en posicion '      00105613
+                             AUX-J                                      00105713
+           ELSE                                                         00105813
+              DISPLAY 'El dia ' AUX-SEARCH ' no existe en la lista'     00105913
+           END-IF                                                       00106013
+                                                                        00106107
+           DISPLAY DSP-GUIONES                                          00106213
+           DISPLAY '  FINAL DEL PROGRAMA ' CTE-NOMPGM                   00106307
+           DISPLAY DSP-WILDCARDS                                        00106413
+           .                                                            00106507
+                                                                        00107007
+       INSERTAR-ESPACIOS.                                               00131102
+      **   DISPLAY ' '                                                  00131213
+           CONTINUE                                                     00131313
+           .                                                            00131402
+                                                                        00131502
+      *------------*                                                    00132000
+       3000-END.                                                        00140000
+      *------------*                                                    00150000
+           STOP RUN.                                                    00172001
+                                                                        00180000
